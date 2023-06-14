@@ -289,7 +289,11 @@ forever program =
 
 closeFileDescriptors :: IO ()
 closeFileDescriptors =
+#if MIN_VERSION_unix(2,8,0)
+    do null <- openFd "/dev/null" ReadWrite defaultFileFlags
+#else
     do null <- openFd "/dev/null" ReadWrite Nothing defaultFileFlags
+#endif
        let sendTo fd' fd = closeFd fd >> dupTo fd' fd
        mapM_ (sendTo null) [stdInput, stdOutput, stdError]
 
